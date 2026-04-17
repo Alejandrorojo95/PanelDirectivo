@@ -98,7 +98,7 @@
         .nav-item:hover { color: #fff; background: rgba(255,255,255,.08); }
         .nav-item.active {
             color: #fff;
-            background: rgba(255,255,255,.12);
+            background: rgba(255,255,255,0.12);
             border-left-color: #60a5fa;
             font-weight: 500;
         }
@@ -236,13 +236,13 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
             <div class="logo-icon">🏫</div>
-            <div class="school-name" id="sb-school">Mi Escuela</div>
+            <div class="school-name" id="sb-school">Cargando...</div>
             <div class="school-sub">Panel Directivo</div>
         </div>
         <nav class="nav">
             <div class="nav-item active" onclick="goTo('inicio')">🏠 Inicio</div>
             <div class="nav-item" onclick="goTo('accesos')">📂 Todos los Archivos</div>
-            <div class="nav-sep" style="height:1px; background:rgba(255,255,255,0.1); margin:10px 0;"></div>
+            <div style="height:1px; background:rgba(255,255,255,0.1); margin:10px 0;"></div>
             <div class="nav-item" onclick="goTo('config')">⚙️ Configuración</div>
         </nav>
         <div class="sidebar-footer">
@@ -257,13 +257,12 @@
             <div class="topbar-title" id="topbar-title">Inicio</div>
             <div class="search-wrap">
                 <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"/></svg>
-                <input class="search-input" type="text" id="search" placeholder="Buscar..." oninput="filtrarGlobal()">
+                <input class="search-input" type="text" id="search" placeholder="Buscar por nombre..." oninput="filtrarGlobal()">
             </div>
-            <div class="status-pill loading" id="status-pill"><div class="status-dot"></div><span id="status-text">Cargando...</span></div>
+            <div class="status-pill loading" id="status-pill"><div class="status-dot"></div><span id="status-text">Iniciando...</span></div>
         </div>
 
         <div class="content">
-            <!-- SECCIÓN INICIO -->
             <div class="section active" id="sec-inicio">
                 <div class="stats-grid">
                     <div class="stat-card"><div class="stat-icon blue">📁</div><div><div class="stat-label">Archivos</div><div class="stat-value" id="st-total">0</div></div></div>
@@ -275,32 +274,30 @@
                 <div class="section-header"><div class="section-title">⭐ Favoritos Recientes</div></div>
                 <div class="fav-strip" id="fav-strip"></div>
 
-                <div class="section-header" style="margin-top: 32px;"><div class="section-title">📂 Documentos Cargados</div></div>
+                <div class="section-header" style="margin-top: 32px;"><div class="section-title">📂 Últimos Documentos</div></div>
                 <div class="cards-grid" id="inicio-cards"></div>
             </div>
 
-            <!-- SECCIÓN ACCESOS -->
             <div class="section" id="sec-accesos">
                 <div class="section-header"><div><div class="section-title">Explorador de Archivos</div><div class="section-sub">Filtrá por categorías configuradas en tu planilla</div></div></div>
                 <div class="cat-filter" id="cat-filter"></div>
                 <div class="cards-grid" id="accesos-cards"></div>
             </div>
 
-            <!-- SECCIÓN CONFIG -->
             <div class="section" id="sec-config">
                 <div class="setup-card">
                     <h2>⚙️ Configuración del Panel</h2>
-                    <p style="margin-top:8px; color:var(--text2); font-size:13px;">Conectá tu Google Sheet publicada como CSV para actualizar este panel automáticamente.</p>
+                    <p style="margin-top:8px; color:var(--text2); font-size:13px;">Conectá tu Google Sheet publicada como CSV.</p>
                     <div class="url-form">
                         <input class="url-input" type="text" id="url-input" placeholder="https://docs.google.com/.../pub?output=csv">
                         <button class="btn btn-primary" onclick="guardarURL()">Conectar</button>
                     </div>
                     <div style="margin-top:20px; display:flex; gap:10px;">
-                        <button class="btn btn-secondary" onclick="usarDemoData()">Ver ejemplo</button>
-                        <button class="btn btn-secondary" onclick="limpiarConfig()">Resetear</button>
+                        <button class="btn btn-secondary" onclick="usarDemoData()">Cargar Ejemplo</button>
+                        <button class="btn btn-secondary" onclick="limpiarConfig()">Borrar Todo</button>
                     </div>
                     <div style="margin-top:30px; padding:15px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
-                        <p style="font-size:12px; line-height:1.5;"><strong>Instrucciones:</strong><br>1. En tu planilla, poné estos encabezados: <code>nombre, link, categoria, tipo, favorito</code>.<br>2. Archivo > Compartir > Publicar en la Web.<br>3. Elegí "Valores separados por comas (.csv)".<br>4. Copiá el link y pegalo arriba.</p>
+                        <p style="font-size:12px; line-height:1.5;"><strong>Pasos para conectar:</strong><br>1. En tu Excel: Archivo > Compartir > Publicar en la Web.<br>2. Elegí "Valores separados por comas (.csv)".<br>3. Copiá el link y pegalo arriba.</p>
                     </div>
                 </div>
             </div>
@@ -312,26 +309,25 @@
 
 <script>
 const CONFIG = {
-    nombreInstitucion: "INSTITUCIÓN EDUCATIVA",
+    nombreInstitucion: "MI INSTITUCIÓN",
     sheetURL: localStorage.getItem('panel-sheet-url') || "",
-    updateMinutes: 15
+    updateMinutes: 10
 };
 
 const ICONOS = {
-    doc:"📄", sheet:"📊", form:"📋", slides:"📑", folder:"📁", pdf:"📕", other:"🔗"
+    doc:"📄", sheet:"📊", form:"📋", slides:"📑", folder:"📁", pdf:"📕", link:"🔗"
 };
 
 const COLORS = [
     {bg: '#eff6ff', tx: '#1d4ed8'}, {bg: '#ecfdf5', tx: '#059669'}, 
     {bg: '#fffbeb', tx: '#d97706'}, {bg: '#fef2f2', tx: '#dc2626'},
-    {bg: '#f5f3ff', tx: '#7c3aed'}, {bg: '#f0f9ff', tx: '#0ea5e9'}
+    {bg: '#f5f3ff', tx: '#7c3aed'}
 ];
 
 let allData = [];
 let categories = [];
 let activeFilter = "todos";
 
-// ── INICIALIZACIÓN ──
 window.onload = () => {
     document.getElementById('sb-school').textContent = CONFIG.nombreInstitucion;
     document.getElementById('st-fecha').textContent = new Date().toLocaleDateString('es-AR', {day:'numeric', month:'short'});
@@ -340,59 +336,57 @@ window.onload = () => {
         sincronizar();
     } else {
         const cached = localStorage.getItem('panel-data');
-        if (cached) procesarData(JSON.parse(cached));
-        setStatus('error', 'Sin conexión');
-        goTo('config');
+        if (cached) {
+            procesarData(JSON.parse(cached));
+            setStatus('ok', 'Cache local');
+        } else {
+            setStatus('error', 'Sin Datos');
+            goTo('config');
+        }
     }
-    
-    setInterval(() => { if(CONFIG.sheetURL) sincronizar(); }, CONFIG.updateMinutes * 60000);
 };
 
-// ── NAVEGACIÓN ──
-function goTo(sec) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('sec-' + sec).classList.add('active');
-    document.getElementById('topbar-title').textContent = {inicio:'Inicio', accesos:'Explorador', config:'Configuración'}[sec];
-    
-    // Activar item del nav
-    const index = {inicio: 0, accesos: 1, config: 2}[sec];
-    document.querySelectorAll('.nav-item')[index].classList.add('active');
-    
-    if (window.innerWidth < 768) toggleSidebar();
-}
-
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-
-// ── DATOS ──
 async function sincronizar() {
-    if (!CONFIG.sheetURL) { showToast("⚠️ No hay URL configurada"); return; }
+    if (!CONFIG.sheetURL) return;
     setStatus('loading', 'Sincronizando...');
     
     try {
-        const response = await fetch(CONFIG.sheetURL + "&t=" + Date.now());
+        const cleanURL = CONFIG.sheetURL.includes('?') 
+            ? `${CONFIG.sheetURL}&t=${Date.now()}` 
+            : `${CONFIG.sheetURL}?t=${Date.now()}`;
+
+        const response = await fetch(cleanURL);
+        if (!response.ok) throw new Error('Error en respuesta');
+        
         const text = await response.text();
         const data = parseCSV(text);
         
         if (data.length > 0) {
             procesarData(data);
             localStorage.setItem('panel-data', JSON.stringify(data));
-            localStorage.setItem('panel-last-sync', new Date().toLocaleString());
             document.getElementById('sync-time').textContent = "Hoy " + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             setStatus('ok', 'Conectado');
-            showToast("✅ Actualizado");
+            showToast("✅ Sincronizado");
         }
     } catch (e) {
-        setStatus('error', 'Error Sync');
-        showToast("❌ Error al leer la planilla");
+        console.error(e);
+        setStatus('error', 'Error de Conexión');
+        showToast("❌ No se pudo obtener datos");
     }
 }
 
 function parseCSV(text) {
-    const lines = text.split('\n');
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    return lines.slice(1).filter(l => l.trim() !== "").map(line => {
-        const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // Regex para comas dentro de comillas
+    const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+    if (lines.length < 2) return [];
+
+    // Limpiar encabezados (quitar tildes, espacios y mayúsculas)
+    const headers = lines[0].split(',').map(h => 
+        h.trim().toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    );
+
+    return lines.slice(1).map(line => {
+        const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
         let obj = {};
         headers.forEach((h, i) => {
             let val = (values[i] || "").replace(/"/g, "").trim();
@@ -404,16 +398,15 @@ function parseCSV(text) {
 
 function procesarData(data) {
     allData = data;
-    categories = [...new Set(data.map(d => d.categoria || "General"))];
+    categories = [...new Set(data.map(d => d.categoria || "General"))].filter(c => c);
     
     renderStats();
     renderFavs();
-    renderCards('inicio-cards', allData);
+    renderCards('inicio-cards', allData.slice(0, 8)); // Solo 8 en inicio
     renderFilters();
     renderCards('accesos-cards', allData);
 }
 
-// ── RENDERIZADO ──
 function renderStats() {
     document.getElementById('st-total').textContent = allData.length;
     document.getElementById('st-cats').textContent = categories.length;
@@ -423,43 +416,32 @@ function renderStats() {
 function renderFavs() {
     const container = document.getElementById('fav-strip');
     const favs = allData.filter(d => d.favorito?.toLowerCase() === 'si');
-    
-    if (favs.length === 0) {
-        container.innerHTML = `<p style="color:var(--text3); font-size:12px;">No hay marcados como favoritos.</p>`;
-        return;
-    }
-    
-    container.innerHTML = favs.map(f => `
+    container.innerHTML = favs.length ? favs.map(f => `
         <a href="${f.link}" target="_blank" class="fav-chip">
-            <span>${ICONOS[f.tipo] || '🔗'}</span> ${f.nombre}
+            <span>${ICONOS[f.tipo?.toLowerCase()] || '🔗'}</span> ${f.nombre}
         </a>
-    `).join('');
+    `).join('') : '<p style="color:var(--text3); font-size:12px;">Sin favoritos.</p>';
 }
 
 function renderCards(containerId, data) {
     const container = document.getElementById(containerId);
-    if (data.length === 0) {
-        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text3)">No se encontraron resultados</div>`;
-        return;
-    }
-    
-    container.innerHTML = data.map(item => {
+    container.innerHTML = data.length ? data.map(item => {
         const color = getCategoryColor(item.categoria);
         return `
             <a href="${item.link}" target="_blank" class="drive-card">
                 ${item.favorito?.toLowerCase() === 'si' ? '<span class="fav-badge">⭐</span>' : ''}
                 <div class="card-type-icon" style="background:${color.bg}; color:${color.tx}">
-                    ${ICONOS[item.tipo] || '🔗'}
+                    ${ICONOS[item.tipo?.toLowerCase()] || '🔗'}
                 </div>
                 <div class="card-name">${item.nombre}</div>
                 <div><span class="card-cat-pill" style="background:${color.bg}; color:${color.tx}">${item.categoria || 'General'}</span></div>
                 <div class="card-footer">
-                    <span>${(item.tipo || 'Enlace').toUpperCase()}</span>
+                    <span>${(item.tipo || 'Link').toUpperCase()}</span>
                     <span>Abrir →</span>
                 </div>
             </a>
         `;
-    }).join('');
+    }).join('') : '<div style="grid-column:1/-1; text-align:center; padding:20px; color:var(--text3)">Sin resultados</div>';
 }
 
 function renderFilters() {
@@ -471,7 +453,6 @@ function renderFilters() {
     container.innerHTML = html;
 }
 
-// ── LÓGICA DE FILTROS ──
 function filtrarCat(cat) {
     activeFilter = cat;
     renderFilters();
@@ -483,21 +464,32 @@ function filtrarGlobal() {
     const term = document.getElementById('search').value.toLowerCase();
     const filtered = allData.filter(d => 
         d.nombre.toLowerCase().includes(term) || 
-        d.categoria.toLowerCase().includes(term)
+        (d.categoria && d.categoria.toLowerCase().includes(term))
     );
-    
-    if (document.getElementById('sec-inicio').classList.contains('active')) {
-        renderCards('inicio-cards', filtered);
-    } else {
-        renderCards('accesos-cards', filtered);
-    }
+    renderCards(document.getElementById('sec-inicio').classList.contains('active') ? 'inicio-cards' : 'accesos-cards', filtered);
 }
 
-// ── UTILIDADES ──
 function getCategoryColor(cat) {
     const index = categories.indexOf(cat);
     return COLORS[index % COLORS.length] || COLORS[0];
 }
+
+function goTo(sec) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('sec-' + sec).classList.add('active');
+    document.getElementById('topbar-title').textContent = {inicio:'Inicio', accesos:'Explorador', config:'Configuración'}[sec];
+    
+    // Activar item correcto
+    const items = document.querySelectorAll('.nav-item');
+    if(sec === 'inicio') items[0].classList.add('active');
+    if(sec === 'accesos') items[1].classList.add('active');
+    if(sec === 'config') items[2].classList.add('active');
+
+    if (window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
 function setStatus(type, text) {
     const pill = document.getElementById('status-pill');
@@ -507,37 +499,37 @@ function setStatus(type, text) {
 
 function showToast(msg) {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
+    t.textContent = msg; t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 function guardarURL() {
-    const url = document.getElementById('url-input').value;
+    const url = document.getElementById('url-input').value.trim();
     if (url.includes('output=csv')) {
         localStorage.setItem('panel-sheet-url', url);
         CONFIG.sheetURL = url;
         sincronizar();
-        showToast("✅ URL guardada");
+        showToast("✅ URL Guardada");
     } else {
-        showToast("❌ La URL debe terminar en output=csv");
+        showToast("❌ URL inválida (debe ser .csv)");
     }
 }
 
 function usarDemoData() {
     const demo = [
-        {nombre:"Registro de Asistencia", link:"#", categoria:"Administración", tipo:"sheet", favorito:"SI"},
-        {nombre:"Circular 01/2025", link:"#", categoria:"Institucional", tipo:"pdf", favorito:"NO"},
-        {nombre:"Planificaciones 1° Año", link:"#", categoria:"Docentes", tipo:"folder", favorito:"SI"},
-        {nombre:"Formulario de Inscripción", link:"#", categoria:"Alumnos", tipo:"form", favorito:"NO"}
+        {nombre:"Manual Institucional", link:"#", categoria:"Documentación", tipo:"pdf", favorito:"SI"},
+        {nombre:"Planilla de Asistencia", link:"#", categoria:"Administración", tipo:"sheet", favorito:"NO"},
+        {nombre:"Calendario 2026", link:"#", categoria:"General", tipo:"doc", favorito:"SI"}
     ];
     procesarData(demo);
-    showToast("💡 Cargados datos de ejemplo");
+    showToast("💡 Datos de ejemplo cargados");
 }
 
 function limpiarConfig() {
-    localStorage.clear();
-    location.reload();
+    if(confirm("¿Borrar toda la configuración?")) {
+        localStorage.clear();
+        location.reload();
+    }
 }
 </script>
 </body>
