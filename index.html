@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Directivo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --surface2: #f9fafb;
+            --border: #e4e8f0;
+            --border2: #d0d7e4;
+            --primary: #1a3d6e;
+            --primary-light: #e8eef8;
+            --accent: #2563eb;
+            --accent2: #0ea5e9;
+            --text: #1a202c;
+            --text2: #4a5568;
+            --text3: #8896a5;
+            --success: #059669;
+            --success-bg: #ecfdf5;
+            --warning: #d97706;
+            --warning-bg: #fffbeb;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --radius-lg: 16px;
+            --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+            --shadow-md: 0 2px 8px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.06);
+            --font: 'DM Sans', sans-serif;
+            --mono: 'DM Mono', monospace;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .app { display: flex; min-height: 100vh; }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 220px;
+            background: var(--primary);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 100;
+            transition: transform .25s ease;
+        }
+        .sidebar-logo {
+            padding: 24px 20px 16px;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+        }
+        .sidebar-logo .school-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.3;
+            letter-spacing: .01em;
+        }
+        .sidebar-logo .school-sub {
+            font-size: 11px;
+            color: rgba(255,255,255,.5);
+            margin-top: 2px;
+        }
+        .sidebar-logo .logo-icon {
+            width: 32px; height: 32px;
+            background: rgba(255,255,255,.15);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .nav { padding: 12px 0; flex: 1; }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 20px;
+            color: rgba(255,255,255,.65);
+            font-size: 13px;
+            font-weight: 400;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: all .15s;
+            user-select: none;
+        }
+        .nav-item:hover { color: #fff; background: rgba(255,255,255,.08); }
+        .nav-item.active {
+            color: #fff;
+            background: rgba(255,255,255,.12);
+            border-left-color: #60a5fa;
+            font-weight: 500;
+        }
+        .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: .8; }
+
+        .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,.1); }
+        .sync-btn {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.15);
+            color: rgba(255,255,255,.8);
+            font-family: var(--font);
+            font-size: 12px;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            width: 100%;
+            transition: all .15s;
+        }
+        .sync-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
+        .sync-time { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 6px; text-align: center; }
+
+        /* ── MAIN ── */
+        .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .topbar-title { font-size: 16px; font-weight: 600; color: var(--text); flex: 1; }
+        .search-wrap { position: relative; width: 260px; }
+        .search-wrap svg {
+            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+            width: 15px; height: 15px; color: var(--text3); pointer-events: none;
+        }
+        .search-input {
+            width: 100%; padding: 8px 12px 8px 33px;
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            font-family: var(--font); font-size: 13px;
+            background: var(--surface2); outline: none;
+        }
+        .search-input:focus { border-color: var(--accent); background: #fff; }
+
+        .status-pill {
+            display: flex; align-items: center; gap: 5px;
+            font-size: 11px; font-weight: 500;
+            padding: 5px 10px; border-radius: 20px;
+        }
+        .status-pill.ok { background: var(--success-bg); color: var(--success); }
+        .status-pill.loading { background: #eff6ff; color: var(--accent); }
+        .status-pill.error { background: var(--danger-bg); color: var(--danger); }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+        .content { padding: 28px; flex: 1; }
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* ── CARDS & STATS ── */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 18px 20px;
+            display: flex; align-items: flex-start; gap: 14px;
+        }
+        .stat-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+        .stat-icon.blue { background: #dbeafe; }
+        .stat-icon.green { background: var(--success-bg); }
+        .stat-icon.orange { background: var(--warning-bg); }
+        .stat-icon.purple { background: #f3e8ff; }
+        .stat-label { font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; }
+        .stat-value { font-size: 24px; font-weight: 600; color: var(--text); font-family: var(--mono); }
+
+        .section-header { margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .section-title { font-size: 15px; font-weight: 600; }
+        .section-sub { font-size: 12px; color: var(--text3); }
+
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+        .drive-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 16px;
+            display: flex; flex-direction: column; gap: 12px;
+            text-decoration: none; color: inherit; transition: all .2s;
+            position: relative; overflow: hidden;
+        }
+        .drive-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: var(--shadow-md); }
+        .drive-card::after { content: ''; position: absolute; top:0; left:0; width:3px; height:100%; background: var(--accent); opacity:0; transition: .2s; }
+        .drive-card:hover::after { opacity:1; }
+
+        .card-type-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .card-name { font-size: 13px; font-weight: 600; line-height: 1.4; color: var(--text); }
+        .card-cat-pill { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+        .card-footer { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text3); display: flex; justify-content: space-between; }
+        .fav-badge { position: absolute; top: 12px; right: 12px; font-size: 14px; }
+
+        .cat-filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .cat-chip { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 12px; cursor: pointer; background: #fff; transition: .2s; }
+        .cat-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        .fav-strip { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+        .fav-chip { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border); padding: 8px 14px; border-radius: var(--radius-sm); text-decoration: none; font-size: 13px; color: var(--text); font-weight: 500; transition: .2s; }
+        .fav-chip:hover { border-color: var(--accent); color: var(--accent); box-shadow: var(--shadow); }
+
+        /* Setup Panel */
+        .setup-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; max-width: 700px; margin: 0 auto; }
+        .url-form { display: flex; gap: 10px; margin-top: 20px; }
+        .url-input { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--mono); font-size: 12px; }
+        .btn { padding: 10px 20px; border-radius: var(--radius-sm); border: none; font-weight: 500; cursor: pointer; font-family: var(--font); }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-secondary { background: var(--bg); color: var(--text2); border: 1px solid var(--border); }
+
+        .toast { position: fixed; bottom: 24px; right: 24px; background: #333; color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 13px; transform: translateY(100px); opacity: 0; transition: .3s; z-index: 1000; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+
+        .hamburger { display: none; flex-direction: column; gap: 4px; cursor: pointer; }
+        .hamburger span { width: 20px; height: 2px; background: var(--text); }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .hamburger { display: flex; }
+            .search-wrap { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">🏫</div>
+            <div class="school-name" id="sb-school">Mi Escuela</div>
+            <div class="school-sub">Panel Directivo</div>
+        </div>
+        <nav class="nav">
+            <div class="nav-item active" onclick="goTo('inicio')">🏠 Inicio</div>
+            <div class="nav-item" onclick="goTo('accesos')">📂 Todos los Archivos</div>
+            <div class="nav-sep" style="height:1px; background:rgba(255,255,255,0.1); margin:10px 0;"></div>
+            <div class="nav-item" onclick="goTo('config')">⚙️ Configuración</div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sync-btn" onclick="sincronizar()">🔄 Sincronizar</button>
+            <div class="sync-time" id="sync-time">Nunca sincronizado</div>
+        </div>
+    </aside>
+
+    <div class="main">
+        <div class="topbar">
+            <div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
+            <div class="topbar-title" id="topbar-title">Inicio</div>
+            <div class="search-wrap">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"/></svg>
+                <input class="search-input" type="text" id="search" placeholder="Buscar..." oninput="filtrarGlobal()">
+            </div>
+            <div class="status-pill loading" id="status-pill"><div class="status-dot"></div><span id="status-text">Cargando...</span></div>
+        </div>
+
+        <div class="content">
+            <!-- SECCIÓN INICIO -->
+            <div class="section active" id="sec-inicio">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-icon blue">📁</div><div><div class="stat-label">Archivos</div><div class="stat-value" id="st-total">0</div></div></div>
+                    <div class="stat-card"><div class="stat-icon purple">🗂</div><div><div class="stat-label">Categorías</div><div class="stat-value" id="st-cats">0</div></div></div>
+                    <div class="stat-card"><div class="stat-icon orange">⭐</div><div><div class="stat-label">Favoritos</div><div class="stat-value" id="st-favs">0</div></div></div>
+                    <div class="stat-card"><div class="stat-icon green">📅</div><div><div class="stat-label">Fecha</div><div class="stat-value" id="st-fecha" style="font-size:15px; margin-top:5px">--</div></div></div>
+                </div>
+
+                <div class="section-header"><div class="section-title">⭐ Favoritos Recientes</div></div>
+                <div class="fav-strip" id="fav-strip"></div>
+
+                <div class="section-header" style="margin-top: 32px;"><div class="section-title">📂 Documentos Cargados</div></div>
+                <div class="cards-grid" id="inicio-cards"></div>
+            </div>
+
+            <!-- SECCIÓN ACCESOS -->
+            <div class="section" id="sec-accesos">
+                <div class="section-header"><div><div class="section-title">Explorador de Archivos</div><div class="section-sub">Filtrá por categorías configuradas en tu planilla</div></div></div>
+                <div class="cat-filter" id="cat-filter"></div>
+                <div class="cards-grid" id="accesos-cards"></div>
+            </div>
+
+            <!-- SECCIÓN CONFIG -->
+            <div class="section" id="sec-config">
+                <div class="setup-card">
+                    <h2>⚙️ Configuración del Panel</h2>
+                    <p style="margin-top:8px; color:var(--text2); font-size:13px;">Conectá tu Google Sheet publicada como CSV para actualizar este panel automáticamente.</p>
+                    <div class="url-form">
+                        <input class="url-input" type="text" id="url-input" placeholder="https://docs.google.com/.../pub?output=csv">
+                        <button class="btn btn-primary" onclick="guardarURL()">Conectar</button>
+                    </div>
+                    <div style="margin-top:20px; display:flex; gap:10px;">
+                        <button class="btn btn-secondary" onclick="usarDemoData()">Ver ejemplo</button>
+                        <button class="btn btn-secondary" onclick="limpiarConfig()">Resetear</button>
+                    </div>
+                    <div style="margin-top:30px; padding:15px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
+                        <p style="font-size:12px; line-height:1.5;"><strong>Instrucciones:</strong><br>1. En tu planilla, poné estos encabezados: <code>nombre, link, categoria, tipo, favorito</code>.<br>2. Archivo > Compartir > Publicar en la Web.<br>3. Elegí "Valores separados por comas (.csv)".<br>4. Copiá el link y pegalo arriba.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CONFIG = {
+    nombreInstitucion: "INSTITUCIÓN EDUCATIVA",
+    sheetURL: localStorage.getItem('panel-sheet-url') || "",
+    updateMinutes: 15
+};
+
+const ICONOS = {
+    doc:"📄", sheet:"📊", form:"📋", slides:"📑", folder:"📁", pdf:"📕", other:"🔗"
+};
+
+const COLORS = [
+    {bg: '#eff6ff', tx: '#1d4ed8'}, {bg: '#ecfdf5', tx: '#059669'}, 
+    {bg: '#fffbeb', tx: '#d97706'}, {bg: '#fef2f2', tx: '#dc2626'},
+    {bg: '#f5f3ff', tx: '#7c3aed'}, {bg: '#f0f9ff', tx: '#0ea5e9'}
+];
+
+let allData = [];
+let categories = [];
+let activeFilter = "todos";
+
+// ── INICIALIZACIÓN ──
+window.onload = () => {
+    document.getElementById('sb-school').textContent = CONFIG.nombreInstitucion;
+    document.getElementById('st-fecha').textContent = new Date().toLocaleDateString('es-AR', {day:'numeric', month:'short'});
+    
+    if (CONFIG.sheetURL) {
+        sincronizar();
+    } else {
+        const cached = localStorage.getItem('panel-data');
+        if (cached) procesarData(JSON.parse(cached));
+        setStatus('error', 'Sin conexión');
+        goTo('config');
+    }
+    
+    setInterval(() => { if(CONFIG.sheetURL) sincronizar(); }, CONFIG.updateMinutes * 60000);
+};
+
+// ── NAVEGACIÓN ──
+function goTo(sec) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('sec-' + sec).classList.add('active');
+    document.getElementById('topbar-title').textContent = {inicio:'Inicio', accesos:'Explorador', config:'Configuración'}[sec];
+    
+    // Activar item del nav
+    const index = {inicio: 0, accesos: 1, config: 2}[sec];
+    document.querySelectorAll('.nav-item')[index].classList.add('active');
+    
+    if (window.innerWidth < 768) toggleSidebar();
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+// ── DATOS ──
+async function sincronizar() {
+    if (!CONFIG.sheetURL) { showToast("⚠️ No hay URL configurada"); return; }
+    setStatus('loading', 'Sincronizando...');
+    
+    try {
+        const response = await fetch(CONFIG.sheetURL + "&t=" + Date.now());
+        const text = await response.text();
+        const data = parseCSV(text);
+        
+        if (data.length > 0) {
+            procesarData(data);
+            localStorage.setItem('panel-data', JSON.stringify(data));
+            localStorage.setItem('panel-last-sync', new Date().toLocaleString());
+            document.getElementById('sync-time').textContent = "Hoy " + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            setStatus('ok', 'Conectado');
+            showToast("✅ Actualizado");
+        }
+    } catch (e) {
+        setStatus('error', 'Error Sync');
+        showToast("❌ Error al leer la planilla");
+    }
+}
+
+function parseCSV(text) {
+    const lines = text.split('\n');
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    return lines.slice(1).filter(l => l.trim() !== "").map(line => {
+        const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // Regex para comas dentro de comillas
+        let obj = {};
+        headers.forEach((h, i) => {
+            let val = (values[i] || "").replace(/"/g, "").trim();
+            obj[h] = val;
+        });
+        return obj;
+    }).filter(o => o.nombre && o.link);
+}
+
+function procesarData(data) {
+    allData = data;
+    categories = [...new Set(data.map(d => d.categoria || "General"))];
+    
+    renderStats();
+    renderFavs();
+    renderCards('inicio-cards', allData);
+    renderFilters();
+    renderCards('accesos-cards', allData);
+}
+
+// ── RENDERIZADO ──
+function renderStats() {
+    document.getElementById('st-total').textContent = allData.length;
+    document.getElementById('st-cats').textContent = categories.length;
+    document.getElementById('st-favs').textContent = allData.filter(d => d.favorito?.toLowerCase() === 'si').length;
+}
+
+function renderFavs() {
+    const container = document.getElementById('fav-strip');
+    const favs = allData.filter(d => d.favorito?.toLowerCase() === 'si');
+    
+    if (favs.length === 0) {
+        container.innerHTML = `<p style="color:var(--text3); font-size:12px;">No hay marcados como favoritos.</p>`;
+        return;
+    }
+    
+    container.innerHTML = favs.map(f => `
+        <a href="${f.link}" target="_blank" class="fav-chip">
+            <span>${ICONOS[f.tipo] || '🔗'}</span> ${f.nombre}
+        </a>
+    `).join('');
+}
+
+function renderCards(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (data.length === 0) {
+        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text3)">No se encontraron resultados</div>`;
+        return;
+    }
+    
+    container.innerHTML = data.map(item => {
+        const color = getCategoryColor(item.categoria);
+        return `
+            <a href="${item.link}" target="_blank" class="drive-card">
+                ${item.favorito?.toLowerCase() === 'si' ? '<span class="fav-badge">⭐</span>' : ''}
+                <div class="card-type-icon" style="background:${color.bg}; color:${color.tx}">
+                    ${ICONOS[item.tipo] || '🔗'}
+                </div>
+                <div class="card-name">${item.nombre}</div>
+                <div><span class="card-cat-pill" style="background:${color.bg}; color:${color.tx}">${item.categoria || 'General'}</span></div>
+                <div class="card-footer">
+                    <span>${(item.tipo || 'Enlace').toUpperCase()}</span>
+                    <span>Abrir →</span>
+                </div>
+            </a>
+        `;
+    }).join('');
+}
+
+function renderFilters() {
+    const container = document.getElementById('cat-filter');
+    let html = `<div class="cat-chip ${activeFilter === 'todos' ? 'active' : ''}" onclick="filtrarCat('todos')">Todos</div>`;
+    categories.forEach(cat => {
+        html += `<div class="cat-chip ${activeFilter === cat ? 'active' : ''}" onclick="filtrarCat('${cat}')">${cat}</div>`;
+    });
+    container.innerHTML = html;
+}
+
+// ── LÓGICA DE FILTROS ──
+function filtrarCat(cat) {
+    activeFilter = cat;
+    renderFilters();
+    const filtered = cat === 'todos' ? allData : allData.filter(d => d.categoria === cat);
+    renderCards('accesos-cards', filtered);
+}
+
+function filtrarGlobal() {
+    const term = document.getElementById('search').value.toLowerCase();
+    const filtered = allData.filter(d => 
+        d.nombre.toLowerCase().includes(term) || 
+        d.categoria.toLowerCase().includes(term)
+    );
+    
+    if (document.getElementById('sec-inicio').classList.contains('active')) {
+        renderCards('inicio-cards', filtered);
+    } else {
+        renderCards('accesos-cards', filtered);
+    }
+}
+
+// ── UTILIDADES ──
+function getCategoryColor(cat) {
+    const index = categories.indexOf(cat);
+    return COLORS[index % COLORS.length] || COLORS[0];
+}
+
+function setStatus(type, text) {
+    const pill = document.getElementById('status-pill');
+    pill.className = `status-pill ${type}`;
+    document.getElementById('status-text').textContent = text;
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function guardarURL() {
+    const url = document.getElementById('url-input').value;
+    if (url.includes('output=csv')) {
+        localStorage.setItem('panel-sheet-url', url);
+        CONFIG.sheetURL = url;
+        sincronizar();
+        showToast("✅ URL guardada");
+    } else {
+        showToast("❌ La URL debe terminar en output=csv");
+    }
+}
+
+function usarDemoData() {
+    const demo = [
+        {nombre:"Registro de Asistencia", link:"#", categoria:"Administración", tipo:"sheet", favorito:"SI"},
+        {nombre:"Circular 01/2025", link:"#", categoria:"Institucional", tipo:"pdf", favorito:"NO"},
+        {nombre:"Planificaciones 1° Año", link:"#", categoria:"Docentes", tipo:"folder", favorito:"SI"},
+        {nombre:"Formulario de Inscripción", link:"#", categoria:"Alumnos", tipo:"form", favorito:"NO"}
+    ];
+    procesarData(demo);
+    showToast("💡 Cargados datos de ejemplo");
+}
+
+function limpiarConfig() {
+    localStorage.clear();
+    location.reload();
+}
+</script>
+</body>
+</html>
