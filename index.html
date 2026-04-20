@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instituto Dr. Luis F. Leloir (PRIMARIA) - Gestión 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #064e3b; 
+            --primary-light: #065f46;
+            --accent: #10b981; 
+            --accent-hover: #059669;
+            --accent-soft: rgba(16, 185, 129, 0.08);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc; 
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius-2xl: 24px;
+            --radius-xl: 18px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg: #020617;
+            --sidebar-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --primary: #10b981;
+            --accent-soft: rgba(16, 185, 129, 0.15);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text-main); 
+            min-height: 100vh; 
+            overflow: hidden; 
+        }
+
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        [data-theme="dark"] ::-webkit-scrollbar-thumb { background: #475569; }
+
+        /* --- Login --- */
+        #login-screen {
+            position: fixed; inset: 0; 
+            background: radial-gradient(circle at top right, #065f46, #064e3b);
+            display: flex; align-items: center; justify-content: center; z-index: 9000;
+        }
+        .login-card {
+            background: white; padding: 3rem; border-radius: var(--radius-2xl);
+            width: 90%; max-width: 420px; text-align: center; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        .login-card img { width: 140px; margin-bottom: 2rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        
+        .login-card h2 { font-weight: 800; color: #064e3b; letter-spacing: -0.5px; }
+
+        /* --- Layout Structure --- */
+        #app-content { display: none; flex-direction: column; height: 100vh; }
+        
+        header { 
+            height: 100px; display: flex; flex-direction: column;
+            background: var(--sidebar-bg); border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        .info-bar {
+            height: 32px; background: var(--primary); color: white; display: flex; align-items: center;
+            justify-content: space-between; padding: 0 2rem; font-size: 0.7rem; font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .header-top { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; }
+        .logo-area { display: flex; align-items: center; gap: 16px; }
+        .logo-area img { height: 50px; }
+        .title-group h1 { font-size: 1.15rem; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
+        .title-group p { font-size: 0.65rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+
+        .main-wrapper { display: flex; flex: 1; overflow: hidden; }
+        
+        /* --- Sidebar Navigation --- */
+        nav { 
+            width: 280px; background: var(--sidebar-bg); border-right: 1px solid var(--border);
+            padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 4px; overflow-y: auto;
+        }
+        .nav-label { 
+            font-size: 0.65rem; font-weight: 800; color: var(--text-muted); 
+            margin: 1.5rem 0 0.5rem 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; 
+        }
+        
+        .nav-link { 
+            padding: 12px 16px; border-radius: var(--radius-lg); cursor: pointer; 
+            color: var(--text-muted); display: flex; align-items: center; gap: 12px; 
+            font-weight: 600; font-size: 0.85rem; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-link:hover { background: var(--accent-soft); color: var(--accent); padding-left: 20px; }
+        .nav-link.active { background: var(--primary); color: white; box-shadow: var(--shadow-md); }
+
+        .submenu { padding-left: 1rem; display: none; flex-direction: column; gap: 2px; margin-top: 4px; border-left: 2px solid var(--border); margin-left: 1.5rem; }
+        .submenu.open { display: flex; }
+        .submenu .nav-link { font-size: 0.8rem; padding: 8px 12px; }
+
+        main { flex: 1; padding: 2rem; overflow-y: auto; background: var(--bg); }
+        
+        /* --- Dashboard Components --- */
+        .pizarra {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); 
+            border: 1px solid #fde68a; padding: 1.5rem;
+            border-radius: var(--radius-xl); margin-bottom: 2rem; position: relative;
+            box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+        }
+        [data-theme="dark"] .pizarra { background: linear-gradient(135deg, #451a03 0%, #78350f 100%); border-color: #92400e; }
+
+        .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .doc-card { 
+            background: var(--card-bg); padding: 1.5rem; border-radius: var(--radius-xl); 
+            border: 1px solid var(--border); transition: all 0.3s ease; position: relative;
+            display: flex; flex-direction: column; min-height: 200px;
+            box-shadow: var(--shadow-sm);
+        }
+        .doc-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--accent); }
+        .doc-card.urgente { border-top: 4px solid var(--danger); }
+
+        /* --- Buttons --- */
+        .btn { 
+            padding: 10px 20px; border-radius: var(--radius-lg); border: none; 
+            font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; 
+            justify-content: center; gap: 8px; font-size: 0.8rem; transition: all 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-light); transform: scale(1.02); }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-muted); }
+        .btn-outline:hover { background: var(--bg); border-color: var(--text-muted); }
+        .btn-danger { background: #fee2e2; color: #dc2626; }
+        .btn-danger:hover { background: #fecaca; }
+
+        /* --- Sidebar Right (Agenda) --- */
+        .aside-right { width: 340px; background: var(--sidebar-bg); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+        .agenda-item {
+            padding: 1.2rem; border-bottom: 1px solid var(--border); position: relative;
+            transition: background 0.2s;
+        }
+        .agenda-item:hover { background: var(--accent-soft); }
+
+        /* --- Modals --- */
+        .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; }
+        .modal-content { 
+            background: var(--card-bg); padding: 2.5rem; border-radius: var(--radius-2xl); 
+            width: 95%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        
+        input, select, textarea { 
+            width: 100%; padding: 12px 16px; margin: 8px 0; border-radius: var(--radius-lg); 
+            border: 1.5px solid var(--border); background: var(--bg); color: var(--text-main); 
+            font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+        }
+        input:focus, select:focus { border-color: var(--accent); }
+        
+        .badge { padding: 5px 12px; border-radius: 30px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* --- Tables --- */
+        .table-container { background: var(--card-bg); border-radius: var(--radius-xl); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow-sm); }
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 16px; background: var(--bg); text-align: left; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+        td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+        tr:last-child td { border-bottom: none; }
+
+        .hidden { display: none !important; }
+        #clock-area { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--primary); font-size: 0.9rem; background: var(--accent-soft); padding: 6px 12px; border-radius: 10px; }
+    </style>
+</head>
+<body data-theme="light">
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+    <div class="login-card">
+        <img src="https://i.ibb.co/3ykS5sC/image-5b60dc.png" alt="LFL">
+        <h2>Panel de Gestión</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem; margin-bottom: 2rem;">Ciclo Lectivo 2026 - Nivel Primario</p>
+        <div id="login-error" style="background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 1rem; display: none; font-weight: 600;">⚠️ Acceso denegado. Revise su correo institucional.</div>
+        <input type="email" id="login-email" placeholder="usuario@lfl.edu.ar" onkeypress="if(event.key==='Enter') login()">
+        <button class="btn btn-primary" style="width: 100%; margin-top: 1rem; height: 50px;" onclick="login()">Ingresar al Sistema</button>
+    </div>
+</div>
+
+<!-- MAIN APP CONTENT -->
+<div id="app-content">
+    <header>
+        <div class="info-bar">
+            <div>📍 DIEGEP 4966 - CUE 061483800 • JEFATURA DE REGIÓN 4</div>
+            <div style="display: flex; gap: 24px;">
+                <span>🚑 EMERGENCIAS: 0800-333-2726</span>
+                <span id="header-date" style="opacity: 0.9;">...</span>
+            </div>
+        </div>
+        <div class="header-top">
+            <div class="logo-area">
+                <img src="https://i.ibb.co/3ykS5sC/image-5b60dc.png" alt="LFL">
+                <div class="title-group">
+                    <h1>Instituto Dr. Luis F. Leloir</h1>
+                    <p>Sede Primaria | Gestión Administrativa y Pedagógica</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div id="clock-area">00:00:00</div>
+                <button onclick="toggleTheme()" class="btn btn-outline" style="width: 40px; padding: 0; height: 40px;">🌓</button>
+                <div style="text-align: right; border-left: 1.5px solid var(--border); padding-left: 16px;">
+                    <p id="user-display-name" style="font-weight: 800; font-size: 0.85rem; line-height: 1;">Nombre</p>
+                    <p id="user-display-role" style="font-size: 0.65rem; color: var(--accent); font-weight: 800; text-transform: uppercase; margin-top: 4px;">Rol</p>
+                </div>
+                <button onclick="logout()" class="btn btn-danger" style="padding: 8px 16px;">Salir</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-wrapper">
+        <nav>
+            <div class="nav-label">General</div>
+            <div class="nav-link active" data-view="dashboard" onclick="setView('dashboard')">🏠 Tablero Principal</div>
+            <div class="nav-link" data-view="favs" onclick="setView('favs')">⭐ Marcadores Guardados</div>
+
+            <div class="nav-label">Organización Pedagógica</div>
+            <div class="nav-link" onclick="toggleSubmenu('sub-docentes')">👩‍🏫 Cuerpo Docente <span style="margin-left:auto; opacity: 0.5;">▾</span></div>
+            <div id="sub-docentes" class="submenu">
+                <div class="nav-link" onclick="filterByCycle('Primer Ciclo')">● Primer Ciclo</div>
+                <div class="nav-link" onclick="filterByCycle('Segundo Ciclo')">● Segundo Ciclo</div>
+                <div class="nav-link" onclick="filterByCycle('Ambos Ciclos')">● Proyectos Integrales</div>
+            </div>
+
+            <div class="nav-label">Departamentos</div>
+            <div class="nav-link" onclick="filterByDept('Dirección')">🏢 Equipo Directivo</div>
+            <div class="nav-link" onclick="filterByDept('Secretaría')">📝 Secretaría Técnica</div>
+            <div class="nav-link" onclick="filterByDept('EOE')">🧠 Gabinete E.O.E.</div>
+            <div class="nav-link" onclick="filterByDept('Administración')">💰 Administración</div>
+
+            <div class="nav-label">Otros Sectores</div>
+            <div class="nav-link" onclick="filterByCycle('Institucional')">🏫 Institucional</div>
+            <div class="nav-link" onclick="filterByCycle('Especiales')">🎨 Profesores Especiales</div>
+
+            <div id="admin-menu-section" class="hidden">
+                <div class="nav-label">Administración del Sistema</div>
+                <div class="nav-link" data-view="users" onclick="setView('users')">👥 Nómina de Personal</div>
+            </div>
+        </nav>
+
+        <main>
+            <section id="view-dashboard">
+                <div class="pizarra">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-weight: 800; font-size: 0.7rem; color: #92400e; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px;">
+                            <span style="font-size: 1.2rem;">📌</span> Comunicados Internos
+                        </span>
+                        <button id="pizarra-edit-btn" class="btn hidden" style="background: white; padding: 5px 10px; box-shadow: var(--shadow-sm); border-radius: 8px;" onclick="editPizarra()">✏️ Editar</button>
+                    </div>
+                    <p id="pizarra-content" style="font-size: 0.95rem; line-height: 1.6; color: #78350f; font-weight: 500;">...</p>
+                </div>
+
+                <div id="dashboard-actions" class="hidden" style="margin-bottom: 2rem; display: flex; gap: 12px;">
+                    <button class="btn btn-primary" onclick="openModal('modal-doc')">✨ Cargar Nuevo Documento</button>
+                </div>
+
+                <div class="doc-grid" id="doc-grid"></div>
+            </section>
+
+            <!-- VISTA USUARIOS -->
+            <section id="view-users" class="hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div>
+                        <h2 style="font-weight: 800; letter-spacing: -0.5px;">Gestión de Personal</h2>
+                        <p style="color: var(--text-muted); font-size: 0.85rem;">Administración de accesos y roles institucionales.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('modal-user')">➕ Registrar Personal</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre y Apellido</th>
+                                <th>Email</th>
+                                <th>Rol / Sector</th>
+                                <th style="text-align: right;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <!-- SIDEBAR AGENDA -->
+        <aside class="aside-right" id="agenda-sidebar">
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); background: var(--bg);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h3 style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 1px;">📅 Agenda Gabinete</h3>
+                    <button onclick="exportAgendaPDF()" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.65rem; border-radius: 6px;">PDF</button>
+                </div>
+            </div>
+            <div id="agenda-container" style="flex: 1; overflow-y: auto;"></div>
+            <div style="padding: 1.5rem; background: var(--sidebar-bg); border-top: 1px solid var(--border);">
+                <button class="btn btn-primary" style="width: 100%;" onclick="openModal('modal-agenda')">Nueva Intervención</button>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal" id="modal-doc">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 1.5rem; font-weight: 800;">Carga de Documentación</h3>
+        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Título del Material</label>
+        <input type="text" id="doc-input-title" placeholder="Ej: Planificación de Matemática">
+        
+        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Enlace (Drive / PDF)</label>
+        <input type="url" id="doc-input-url" placeholder="https://drive.google.com/...">
+        
+        <div style="display: flex; gap: 12px; margin-top: 8px;">
+            <div style="flex:1">
+                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Departamento</label>
+                <select id="doc-input-dept">
+                    <option value="Dirección">Dirección</option>
+                    <option value="Secretaría">Secretaría</option>
+                    <option value="EOE">EOE</option>
+                    <option value="Administración">Administración</option>
+                    <option value="Docentes">Docentes</option>
+                    <option value="Todos" selected>Público General</option>
+                </select>
+            </div>
+            <div style="flex:1">
+                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Sector/Ciclo</label>
+                <select id="doc-input-cycle">
+                    <option value="Institucional">Institucional</option>
+                    <option value="Primer Ciclo">Primer Ciclo</option>
+                    <option value="Segundo Ciclo">Segundo Ciclo</option>
+                    <option value="Ambos Ciclos">Ambos Ciclos</option>
+                    <option value="Especiales">Especiales</option>
+                </select>
+            </div>
+        </div>
+
+        <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Prioridad de Lectura</label>
+        <select id="doc-input-prio">
+            <option value="normal">Informativo (Normal)</option>
+            <option value="urgente">⚠️ Lectura Obligatoria (Urgente)</option>
+        </select>
+
+        <div style="margin-top: 1.5rem;">
+            <p style="font-size: 0.7rem; font-weight: 800; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase;">Control de Acceso:</p>
+            <div style="padding: 16px; background: var(--bg); border-radius: var(--radius-lg); display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem;"><input type="checkbox" value="directivo" checked style="width:auto; margin:0"> Directivos</label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem;"><input type="checkbox" value="docente" checked style="width:auto; margin:0"> Docentes</label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem;"><input type="checkbox" value="eoe" style="width:auto; margin:0"> Gabinete</label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem;"><input type="checkbox" value="secretaria" style="width:auto; margin:0"> Secretaría</label>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; margin-top: 2rem;">
+            <button class="btn btn-primary" style="flex: 2;" onclick="submitDoc()">Publicar Documento</button>
+            <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('modal-doc')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- OTROS MODALS (USER, AGENDA) SIGUEN EL MISMO ESTILO VISUAL -->
+<div class="modal" id="modal-user">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 1.5rem; font-weight: 800;">Registro de Personal</h3>
+        <input type="text" id="user-input-name" placeholder="Nombre completo">
+        <input type="email" id="user-input-email" placeholder="email@lfl.edu.ar">
+        <select id="user-input-role">
+            <option value="docente">Docente</option>
+            <option value="directivo">Directivo / Admin</option>
+            <option value="eoe">EOE / Gabinete</option>
+            <option value="secretaria">Secretaría</option>
+            <option value="administracion">Administración</option>
+        </select>
+        <select id="user-input-cycle-assign">
+            <option value="N/A">Sin Ciclo Asignado</option>
+            <option value="Primer Ciclo">Primer Ciclo</option>
+            <option value="Segundo Ciclo">Segundo Ciclo</option>
+            <option value="Ambos Ciclos">Ambos Ciclos</option>
+        </select>
+        <div style="display: flex; gap: 12px; margin-top: 2rem;">
+            <button class="btn btn-primary" style="flex: 2;" onclick="submitUser()">Habilitar Acceso</button>
+            <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('modal-user')">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modal-agenda">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 1.5rem; font-weight: 800;">Entrada de Agenda</h3>
+        <div style="display: flex; gap: 12px;">
+            <input type="date" id="ag-input-date" style="flex:1">
+            <input type="time" id="ag-input-time" style="flex:1">
+        </div>
+        <input type="text" id="ag-input-student" placeholder="Nombre del Alumno/a">
+        <input type="text" id="ag-input-course" placeholder="Grado y Sección">
+        <textarea id="ag-input-reason" placeholder="Describa el motivo de la intervención..." rows="4"></textarea>
+        <div style="display: flex; gap: 12px; margin-top: 2rem;">
+            <button class="btn btn-primary" style="flex: 2;" onclick="submitAgenda()">Agendar Cita</button>
+            <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('modal-agenda')">Volver</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- LÓGICA DE NEGOCIO MANTENIDA INTEGRAMENTE ---
+let users = JSON.parse(localStorage.getItem('lfl_users_v26_final')) || [
+    { email: "alejandrorojo@lfl.edu.ar", nombre: "Alejandro Rojo", rol: "directivo", cycle: "Ambos Ciclos" },
+    { email: "eoe@lfl.edu.ar", nombre: "Gabinete LFL", rol: "eoe", cycle: "N/A" }
+];
+
+let docs = JSON.parse(localStorage.getItem('lfl_docs_v26_final')) || [
+    { id: 1, title: "Planificación Anual de Contenidos", url: "#", dept: "Docentes", cycle: "Primer Ciclo", prio: "normal", perms: ["directivo", "docente"], date: Date.now() },
+    { id: 2, title: "Proyectos de Segundo Ciclo 2026", url: "#", dept: "Docentes", cycle: "Segundo Ciclo", prio: "normal", perms: ["directivo", "docente"], date: Date.now() }
+];
+
+let agenda = JSON.parse(localStorage.getItem('lfl_agenda_v26_final')) || [];
+let favs = JSON.parse(localStorage.getItem('lfl_favs_v26_final')) || [];
+let currentUser = null;
+
+function login() {
+    const email = document.getElementById('login-email').value.toLowerCase().trim();
+    const user = users.find(u => u.email === email);
+
+    if (user) {
+        currentUser = user;
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-content').style.display = 'flex';
+        
+        document.getElementById('user-display-name').innerText = user.nombre;
+        document.getElementById('user-display-role').innerText = user.rol + (user.cycle !== 'N/A' ? ` | ${user.cycle}` : '');
+        document.getElementById('pizarra-content').innerText = localStorage.getItem('lfl_pizarra_v26') || "Bienvenidos al ciclo lectivo 2026. Este panel es de uso exclusivo para personal del Instituto.";
+
+        if (user.rol === 'directivo') {
+            document.getElementById('admin-menu-section').classList.remove('hidden');
+            document.getElementById('dashboard-actions').classList.remove('hidden');
+            document.getElementById('pizarra-edit-btn').classList.remove('hidden');
+        }
+
+        if (user.rol !== 'directivo' && user.rol !== 'eoe') {
+            document.getElementById('agenda-sidebar').classList.add('hidden');
+        }
+
+        renderDocs();
+        renderUsers();
+        renderAgenda();
+        updateTime();
+    } else {
+        const err = document.getElementById('login-error');
+        err.style.display = 'block';
+        setTimeout(() => err.style.display = 'none', 3000);
+    }
+}
+
+function logout() { location.reload(); }
+
+function toggleSubmenu(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('open');
+}
+
+function updateTime() {
+    const now = new Date();
+    document.getElementById('clock-area').innerText = now.toLocaleTimeString('es-AR');
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('header-date').innerText = now.toLocaleDateString('es-AR', options).toUpperCase();
+}
+setInterval(updateTime, 1000);
+
+function renderDocs(filterDept = null, filterCycle = null, onlyFavs = false) {
+    const container = document.getElementById('doc-grid');
+    container.innerHTML = '';
+    
+    let filtered = docs.filter(d => d.perms.includes(currentUser.rol) || currentUser.rol === 'directivo');
+    
+    if (filterDept) filtered = filtered.filter(d => d.dept === filterDept || d.dept === 'Todos');
+    if (filterCycle) {
+        if (filterCycle === 'Ambos Ciclos') {
+            filtered = filtered.filter(d => d.cycle === 'Ambos Ciclos');
+        } else {
+            filtered = filtered.filter(d => d.cycle === filterCycle || d.cycle === 'Ambos Ciclos' || d.cycle === 'Institucional');
+        }
+    }
+    if (onlyFavs) filtered = filtered.filter(d => favs.includes(d.id));
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 3rem; color: var(--text-muted);">No se encontraron documentos en esta sección.</div>`;
+        return;
+    }
+
+    filtered.forEach(d => {
+        const isFav = favs.includes(d.id);
+        const card = document.createElement('div');
+        card.className = `doc-card ${d.prio === 'urgente' ? 'urgente' : ''}`;
+        card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <span class="badge" style="background:var(--accent-soft); color:var(--accent)">${d.dept}</span>
+                <button onclick="toggleFav(${d.id})" style="background:none; border:none; cursor:pointer; font-size:1.2rem; filter:${isFav ? 'none' : 'grayscale(1) opacity(0.2)'}; transition: 0.2s;">⭐</button>
+            </div>
+            <h4 style="margin-bottom:0.5rem; font-size:1rem; font-weight:700; line-height:1.4; color: var(--text-main);">${d.title}</h4>
+            <div style="font-size:0.75rem; color:var(--text-muted); display:flex; align-items:center; gap:5px; margin-bottom:15px;">
+                <span>📂</span> ${d.cycle}
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top: 15px; border-top: 1px solid var(--border);">
+                <span style="font-size:0.7rem; color:var(--text-muted); font-weight:600;">${new Date(d.date).toLocaleDateString()}</span>
+                <button class="btn btn-primary" style="padding:6px 16px; font-size:0.75rem;" onclick="window.open('${d.url}')">Abrir Recurso</button>
+            </div>
+            ${currentUser.rol === 'directivo' ? `<button onclick="deleteDoc(${d.id})" style="position:absolute; top:45px; right:15px; border:none; background:none; color:var(--danger); cursor:pointer; font-size:0.8rem; opacity: 0.5;">🗑️</button>` : ''}
+        `;
+        container.appendChild(card);
+    });
+}
+
+function submitDoc() {
+    const title = document.getElementById('doc-input-title').value;
+    const url = document.getElementById('doc-input-url').value;
+    const dept = document.getElementById('doc-input-dept').value;
+    const cycle = document.getElementById('doc-input-cycle').value;
+    const prio = document.getElementById('doc-input-prio').value;
+    const perms = Array.from(document.querySelectorAll('#modal-doc input:checked')).map(c => c.value);
+
+    if (!title || !url) return;
+
+    docs.unshift({ id: Date.now(), title, url, dept, cycle, prio, perms, date: Date.now() });
+    localStorage.setItem('lfl_docs_v26_final', JSON.stringify(docs));
+    renderDocs();
+    closeModal('modal-doc');
+}
+
+function deleteDoc(id) {
+    if(confirm("¿Seguro que desea eliminar este documento? Esta acción no se puede deshacer.")) {
+        docs = docs.filter(d => d.id !== id);
+        localStorage.setItem('lfl_docs_v26_final', JSON.stringify(docs));
+        renderDocs();
+    }
+}
+
+function renderUsers() {
+    const tbody = document.getElementById('user-table-body');
+    tbody.innerHTML = '';
+    users.forEach((u, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:32px; height:32px; background:var(--accent-soft); color:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.8rem;">${u.nombre.charAt(0)}</div>
+                    <strong>${u.nombre}</strong>
+                </div>
+            </td>
+            <td style="color:var(--text-muted)">${u.email}</td>
+            <td>
+                <span class="badge" style="background:var(--accent-soft); color:var(--accent)">${u.rol}</span>
+                <div style="font-size:0.65rem; color:var(--text-muted); margin-top:4px; font-weight:600;">${u.cycle}</div>
+            </td>
+            <td style="text-align:right;">
+                ${u.email !== 'alejandrorojo@lfl.edu.ar' ? `<button class="btn btn-danger" style="padding:6px 12px; font-size:0.7rem;" onclick="deleteUser(${index})">Revocar</button>` : '<span style="font-size:0.7rem; color:var(--text-muted); font-style:italic;">Admin Master</span>'}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function submitUser() {
+    const nombre = document.getElementById('user-input-name').value;
+    const email = document.getElementById('user-input-email').value.toLowerCase().trim();
+    const rol = document.getElementById('user-input-role').value;
+    const cycle = document.getElementById('user-input-cycle-assign').value;
+    if (!nombre || !email) return;
+    users.push({ nombre, email, rol, cycle });
+    localStorage.setItem('lfl_users_v26_final', JSON.stringify(users));
+    renderUsers();
+    closeModal('modal-user');
+}
+
+function deleteUser(idx) {
+    if(confirm("¿Está seguro de quitar el acceso a este usuario?")) {
+        users.splice(idx, 1);
+        localStorage.setItem('lfl_users_v26_final', JSON.stringify(users));
+        renderUsers();
+    }
+}
+
+function renderAgenda() {
+    const list = document.getElementById('agenda-container');
+    list.innerHTML = '';
+    agenda.sort((a,b) => new Date(a.date) - new Date(b.date));
+    
+    if (agenda.length === 0) {
+        list.innerHTML = `<div style="padding: 2rem; text-align:center; color: var(--text-muted); font-size: 0.8rem;">Sin intervenciones programadas.</div>`;
+        return;
+    }
+
+    agenda.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'agenda-item';
+        div.innerHTML = `
+            <div style="font-weight:800; color:var(--accent); font-size:0.7rem; letter-spacing: 0.5px; margin-bottom: 4px;">🗓️ ${item.date} • ${item.time}HS</div>
+            <div style="font-size:0.9rem; margin:4px 0; color: var(--text-main);"><strong>${item.student}</strong></div>
+            <div style="font-size:0.75rem; color:var(--text-muted); font-weight: 700; margin-bottom: 8px;">CURSO: ${item.course}</div>
+            <div style="color:var(--text-muted); font-size:0.75rem; line-height:1.4; background: var(--bg); padding: 8px; border-radius: 8px;">${item.reason}</div>
+            <button onclick="deleteAgenda(${idx})" style="position:absolute; top:1.2rem; right:1rem; background:none; border:none; color:var(--danger); cursor:pointer; font-size:1.1rem; opacity: 0.4;">&times;</button>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function submitAgenda() {
+    const date = document.getElementById('ag-input-date').value;
+    const time = document.getElementById('ag-input-time').value;
+    const student = document.getElementById('ag-input-student').value;
+    const course = document.getElementById('ag-input-course').value;
+    const reason = document.getElementById('ag-input-reason').value;
+    if(!date || !student) return;
+    agenda.push({ date, time, student, course, reason });
+    localStorage.setItem('lfl_agenda_v26_final', JSON.stringify(agenda));
+    renderAgenda();
+    closeModal('modal-agenda');
+}
+
+function deleteAgenda(idx) {
+    if(confirm("¿Eliminar registro de agenda?")) {
+        agenda.splice(idx, 1);
+        localStorage.setItem('lfl_agenda_v26_final', JSON.stringify(agenda));
+        renderAgenda();
+    }
+}
+
+function exportAgendaPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("LFL Primaria - Agenda Gabinete EOE", 14, 20);
+    doc.setFontSize(10);
+    doc.text(`Generado el: ${new Date().toLocaleString()}`, 14, 28);
+    const rows = agenda.map(a => [a.date, a.time, a.student, a.course, a.reason]);
+    doc.autoTable({ 
+        startY: 35, 
+        head: [['Fecha', 'Hora', 'Alumno/a', 'Grado', 'Motivo de Intervención']], 
+        body: rows,
+        headStyles: { fillColor: [6, 78, 59] }
+    });
+    doc.save("Agenda_EOE_LFL_2026.pdf");
+}
+
+function setView(viewId) {
+    document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+    document.getElementById('view-' + viewId).classList.remove('hidden');
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    document.querySelector(`[data-view="${viewId}"]`)?.classList.add('active');
+    if (viewId === 'dashboard') renderDocs();
+    if (viewId === 'favs') renderDocs(null, null, true);
+}
+
+function filterByDept(dept) { setView('dashboard'); renderDocs(dept); }
+function filterByCycle(cycle) { setView('dashboard'); renderDocs(null, cycle); }
+
+function toggleFav(id) {
+    if (favs.includes(id)) favs = favs.filter(f => f !== id);
+    else favs.push(id);
+    localStorage.setItem('lfl_favs_v26_final', JSON.stringify(favs));
+    
+    // Si estamos en la vista de favoritos, refrescar inmediatamente
+    const currentActive = document.querySelector('.nav-link.active');
+    if (currentActive && currentActive.dataset.view === 'favs') {
+        renderDocs(null, null, true);
+    } else {
+        renderDocs();
+    }
+}
+
+function editPizarra() {
+    const current = document.getElementById('pizarra-content').innerText;
+    const text = prompt("Ingrese el nuevo comunicado institucional:", current);
+    if (text !== null && text.trim() !== "") {
+        localStorage.setItem('lfl_pizarra_v26', text);
+        document.getElementById('pizarra-content').innerText = text;
+    }
+}
+
+function toggleTheme() { 
+    const body = document.body;
+    body.dataset.theme = body.dataset.theme === 'dark' ? 'light' : 'dark'; 
+}
+
+function openModal(id) { 
+    const el = document.getElementById(id);
+    el.style.display = 'flex'; 
+}
+
+function closeModal(id) { 
+    document.getElementById(id).style.display = 'none'; 
+}
+</script>
+
+</body>
+</html>
