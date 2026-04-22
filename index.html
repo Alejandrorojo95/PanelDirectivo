@@ -270,18 +270,17 @@
         });
     }
 
-    function openDoc(url) {
-            console.log("Intentando abrir URL:", url);
+        function openDoc(url) {
             if (!url || url === '#' || url.trim() === '') {
                 showToast('Sin URL asignada', 'info');
                 return;
             }
-            let finalUrl = url.trim();
-            if (!finalUrl.startsWith('http')) {
-                finalUrl = 'https://' + finalUrl;
-            }
-            window.open(finalUrl, '_blank');
-    }
+            // Si no tiene https, lo agregamos
+            let link = url.trim();
+            if (!link.startsWith('http')) link = 'https://' + link;
+            
+            window.open(link, '_blank');
+        }
 
     async function submitDoc() {
         const title=trim('doc-input-title'), url=trim('doc-input-url'),
@@ -642,6 +641,7 @@
         toggleSubmenu, toggleTheme, openModal, closeModal,
         confirmAction: ()=>{ closeModal('modal-confirm'); if(pendingAction){pendingAction();pendingAction=null;} }
     });
+            window.openDoc = openDoc;
     </script>
 
     <style>
