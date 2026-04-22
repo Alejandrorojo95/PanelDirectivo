@@ -163,13 +163,14 @@
             const pizDoc = await getDoc(doc(db,'config','pizarra'));
             $('pizarra-content').innerText = pizDoc.exists() ? pizDoc.data().text : 'Bienvenidos al ciclo lectivo 2026.';
 
-            /* permisos de UI */
-            if(currentUser.rol==='directivo'){
-                $('admin-menu-section').classList.remove('hidden');
-                $('dashboard-actions').classList.remove('hidden');
-                $('pizarra-admin-btns').classList.remove('hidden');
-                $('setup-banner').classList.add('hidden'); // ocultamos banner si ya hay acceso
-            }
+           // ASÍ DEBE QUEDAR:
+                $('setup-banner').classList.add('hidden'); // Se oculta para TODOS los que logren entrar
+                
+                if(currentUser.rol === 'directivo') {
+                    $('admin-menu-section').classList.remove('hidden');
+                    $('dashboard-actions').classList.remove('hidden');
+                    $('pizarra-admin-btns').classList.remove('hidden');
+                }
             if(currentUser.rol!=='directivo'&&currentUser.rol!=='eoe'){
                 $('agenda-sidebar').classList.add('hidden');
             }
