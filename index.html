@@ -270,17 +270,30 @@
         });
     }
 
-        function openDoc(url) {
-            if (!url || url === '#' || url.trim() === '') {
-                showToast('Sin URL asignada', 'info');
-                return;
-            }
-            // Si no tiene https, lo agregamos
-            let link = url.trim();
-            if (!link.startsWith('http')) link = 'https://' + link;
-            
-            window.open(link, '_blank');
-        }
+        /* ─── Función corregida (Copia desde aquí) ─── */
+function openDoc(url) {
+    console.log("Intentando abrir URL:", url);
+    
+    if (!url || url === '#' || url.trim() === '') {
+        showToast('Sin URL asignada', 'info');
+        return;
+    }
+
+    // Limpiamos espacios y aseguramos el protocolo https
+    let link = url.trim();
+    if (!link.startsWith('http')) {
+        link = 'https://' + link;
+    }
+
+    // Abrimos en pestaña nueva
+    const win = window.open(link, '_blank');
+    
+    // Verificamos si el navegador bloqueó la ventana emergente
+    if (!win || win.closed || typeof win.closed === 'undefined') {
+        showToast('Ventana bloqueada. Por favor, permite las ventanas emergentes.', 'warning');
+    }
+}
+/* ─── Hasta aquí ─── */
 
     async function submitDoc() {
         const title=trim('doc-input-title'), url=trim('doc-input-url'),
